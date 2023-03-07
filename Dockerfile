@@ -2,6 +2,12 @@
 
 FROM node:lts as builder
 
+RUN apt update
+RUN apt install -y chromium
+
+# skips puppeteer installing chrome and points to correct binary
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+
 # The application depends on PolkADAPT, so we have to install and build PolkADAPT first.
 
 WORKDIR /app/polkadapt
