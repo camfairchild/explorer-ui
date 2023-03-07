@@ -100,6 +100,14 @@ ps-top-bar {
   }
 }
 
+.ps-top-bar-network-option--bittensor {
+  &:before {
+    display: inline-block;
+    margin-right: 0.3rem;
+    background-image: url('../../../assets/chains/bittensor.svg');
+  }
+}
+
 .ps-top-bar-network-option--kusama {
   &:before {
     display: inline-block;
