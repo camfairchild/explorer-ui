@@ -51,9 +51,9 @@ export class NetworkService {
   blockHarvester: BlockHarvester
   online: BehaviorSubject<boolean>;
 
-  private defaultDecimals = 12;
+  private defaultDecimals = 9;
   private defaultSS58 = addressDefaults.prefix;
-  private defaultSymbol = 'UNIT';
+  private defaultSymbol = 'TAO';
 
   constructor(private pa: PolkadaptService,
               private bs: BlockService,
@@ -149,9 +149,9 @@ export class NetworkService {
       }
 
       const ss58Format: number = chainSS58 ?? this.defaultSS58;
-      const tokenSymbol: string = (chainTokens && chainTokens[0]) ?? this.defaultSymbol;
-      const tokenDecimals: number = (chainDecimals && chainDecimals[0]) ?? this.defaultDecimals;
-      const iconTheme: IconTheme = systemName && specName && getSystemIcon(systemName, specName) || 'substrate';
+      const tokenSymbol: string = 'TAO';
+      const tokenDecimals: number = 9;
+      const iconTheme: IconTheme = systemName && specName && getSystemIcon(systemName, specName) || 'polkadot';
 
       this.currentNetworkProperties.next({
         ss58Format: ss58Format,
