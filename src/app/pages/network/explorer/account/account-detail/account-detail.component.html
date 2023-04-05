@@ -379,7 +379,7 @@
       <ng-container *ngIf="loadedTabs[2]">
         <ng-container *ngIf="id | async as address">
           <app-account-events [address]="address" [listSize]="listsSize"
-                              [eventTypes]="{'Staking': ['Bonded', 'Chilled', 'Kicked', 'Rewarded', 'Slashed', 'Unbonded', 'Withdrawn']}"
+                              [eventTypes]="{'SubtensorModule': ['StakeAdded', 'StakeRemoved'], 'Balances': ['Withdraw', 'Deposit']}"
                               [columns]="['icon', 'age', 'event', 'amount', 'details']"></app-account-events>
         </ng-container>
       </ng-container>
