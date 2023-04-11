@@ -32,15 +32,11 @@ RUN cd projects/substrate-rpc && npm i
 COPY polkadapt/projects/polkascan-explorer/package.json projects/polkascan-explorer/package.json
 RUN cd projects/polkascan-explorer && npm i
 
-COPY polkadapt/projects/coingecko/package.json projects/coingecko/package.json
-RUN cd projects/coingecko && npm i
-
 # Copy the rest of the files and build all PolkADAPT libraries.
 
 COPY polkadapt .
 RUN npm exec ng build -- --configuration production substrate-rpc
 RUN npm exec ng build -- --configuration production polkascan-explorer
-RUN npm exec ng build -- --configuration production coingecko
 
 # Install the application dependencies.
 

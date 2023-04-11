@@ -5,7 +5,7 @@
   "scripts": {
     "postinstall": "npm update",
     "ng": "ng",
-    "prestart": "cd node_modules/@polkadapt && rm -rf * && ln -s ../../polkadapt/dist/core && ln -s ../../polkadapt/dist/substrate-rpc && ln -s ../../polkadapt/dist/polkascan-explorer && ln -s ../../polkadapt/dist/coingecko",
+    "prestart": "cd node_modules/@polkadapt && rm -rf * && ln -s ../../polkadapt/dist/core && ln -s ../../polkadapt/dist/substrate-rpc && ln -s ../../polkadapt/dist/polkascan-explorer",
     "start": "ng serve --configuration development",
     "build": "ng build --configuration production",
     "test": "ng test",
@@ -23,7 +23,6 @@
     "@angular/platform-browser": "~15.0.4",
     "@angular/platform-browser-dynamic": "~15.0.4",
     "@angular/router": "~15.0.4",
-    "@polkadapt/coingecko": "file:polkadapt/dist/coingecko",
     "@polkadapt/core": "file:polkadapt/dist/core",
     "@polkadapt/polkascan-explorer": "file:polkadapt/dist/polkascan-explorer",
     "@polkadapt/substrate-rpc": "file:polkadapt/dist/substrate-rpc",

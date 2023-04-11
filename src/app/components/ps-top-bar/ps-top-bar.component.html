@@ -14,10 +14,6 @@
     </button>
   </div>
 
-  <div class="ps-top-bar-block-nr" *ngIf="vars.price|async as price">
-    <button mat-button>{{vars.currency | async}} {{price}}</button>
-  </div>
-
   <button class="ps-top-bar-network-selector ps-top-bar-network-option ps-top-bar-network-option--{{(vars.network|async)}}" mat-button [matMenuTriggerFor]="networkMenu">
     {{ (vars.network|async) || 'Network' }}
   </button>

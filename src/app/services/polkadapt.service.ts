@@ -20,13 +20,12 @@ import { Injectable } from '@angular/core';
 import { Polkadapt, PolkadaptRunConfig } from '@polkadapt/core';
 import * as substrate from '@polkadapt/substrate-rpc';
 import * as explorer from '@polkadapt/polkascan-explorer';
-import * as coingecko from '@polkadapt/coingecko';
 import { AppConfig } from '../app-config';
 import { BehaviorSubject, Subject, Subscription, throttleTime } from 'rxjs';
 
-export type AugmentedApi = substrate.Api & explorer.Api & coingecko.Api;
+export type AugmentedApi = substrate.Api & explorer.Api;
 
-type AdapterName = 'substrateRpc' | 'explorerApi' | 'coingeckoApi';
+type AdapterName = 'substrateRpc' | 'explorerApi';
 
 @Injectable({providedIn: 'root'})
 export class PolkadaptService {
@@ -51,8 +50,7 @@ export class PolkadaptService {
   availableAdapters: {
     [network: string]: {
       substrateRpc: substrate.Adapter,
-      explorerApi: explorer.Adapter,
-      coingeckoApi: coingecko.Adapter
+      explorerApi: explorer.Adapter
     }
   } = {};
   badAdapterUrls: { [network: string]: { [K in AdapterName]: string[] } } = {};
@@ -96,16 +94,11 @@ export class PolkadaptService {
         }),
         explorerApi: new explorer.Adapter({
           chain: network
-        }),
-        coingeckoApi: new coingecko.Adapter({
-          chain: network,
-          apiEndpoint: 'https://api.coingecko.com/api/v3/'
         })
       };
       this.badAdapterUrls[network] = {
         substrateRpc: [],
-        explorerApi: [],
-        coingeckoApi: []
+        explorerApi: []
       };
     }
   }
@@ -183,16 +176,6 @@ export class PolkadaptService {
         this.explorerWsConnected.next(false);
       };
       pAdapter.socket.on('close', this.explorerWsDisconnectedHandler);
-    }
-
-    const cAdapter = this.availableAdapters[network].coingeckoApi;
-    try {
-      await cAdapter.isReady;
-    } catch (e) {
-      // Coingecko adapter could not initialize.
-      // For now we unregister the adapter.
-      this.polkadapt.unregister(cAdapter);
-      console.error('Coingecko adapter could not be initialized, it is now unregistered from PolkAdapt.', e);
     }
 
     // Reconnect on sleep and/or online event.

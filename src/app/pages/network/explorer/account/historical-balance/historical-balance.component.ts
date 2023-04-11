@@ -37,7 +37,6 @@ import { AccountData } from '@polkadot/types/interfaces/balances/types';
 import { BN } from '@polkadot/util';
 import * as Highcharts from 'highcharts';
 import { VariablesService } from '../../../../../services/variables.service';
-import { PricingService } from '../../../../../services/pricing.service';
 import { Codec } from '@polkadot/types/types';
 
 
@@ -106,8 +105,7 @@ export class HistoricalBalanceComponent extends PaginatedListComponentBase<pst.A
   constructor(private ns: NetworkService,
               private pa: PolkadaptService,
               private cd: ChangeDetectorRef,
-              private variables: VariablesService,
-              private pricing: PricingService) {
+              private variables: VariablesService) {
     super(ns);
 
     // Fetch the block hash for block 1.
@@ -387,176 +385,6 @@ export class HistoricalBalanceComponent extends PaginatedListComponentBase<pst.A
         )
       ),
       map<(ChartItem | null)[], ChartItem[]>((items) => items.filter((i) => i !== null).sort((a, b) => +a!.blockDate - +b!.blockDate) as ChartItem[]),
-      combineLatestWith(this.pricing.dailyHistoricPrices),
-      map<[ChartItem[], ([number, number][] | undefined)], Highcharts.Options>(([items, historicPrices]): Highcharts.Options => {
-        let pointFormat = '<b>{point.x:%Y-%m-%d %H:%M:%S}</b><br>' +
-          'Block: {point.blockNumber}<br>' +
-          'Total: <b>{point.total}</b><br>' +
-          'Free: {point.free}<br>' +
-          'Reserved: {point.reserved}<br>' +
-          'Locked: {point.locked}<br>' +
-          'Transferable: {point.transferable}';
-
-        let min: number | null = null;
-        let max: number | null = null;
-        let historicPriceSeries: [number, number][] | null = null;
-        let dailyPriceSeries: [number, number][] | null = null;
-
-        if (historicPrices && historicPrices.length > 0) {
-          // Try and set the historical value for the selected currency.
-          items = items.map((i) => {
-            const timestamp = +i.utcStartOfDay;
-
-            // Find the minimum and maximum timestamp.
-            if (min === null || timestamp < min) {
-              min = timestamp;
-            }
-            if (max === null || timestamp > max) {
-              max = timestamp;
-            }
-
-            const historicPrice = historicPrices.find((p) => p[0] === timestamp)
-            if (i.y !== null && historicPrice) {
-              i.historicValue = (i.y * historicPrice[1]).toFixed(2);
-            }
-            return i;
-          })
-
-          // Add historic value to the pointFormatter.
-          pointFormat = pointFormat +
-            '<br>' +
-            'Historic value: {point.historicValue} ' + this.variables.currency.value;
-
-          if (min !== null && max !== null) {
-            // Create a second currency based historic series.
-            const historicPricesInScope = historicPrices
-              .filter((p) => p[0] >= min! && p[0] <= max!)
-
-            const valuePerDay = historicPricesInScope
-              .slice(1)  // Remove the first day
-              .map((p, i) => {
-                let item = items.find((i) => p[0] >= i.utcStartOfDay)
-                if (i === 0 && !item) {
-                  item = items[0];
-                }
-                if (item && item.y !== null) {
-                  return [p[0], parseFloat((item.y * p[1]).toFixed(2))]
-                }
-                return null;
-              }).filter((p) => p !== null) as [number, number][];
-
-            const valuePerItem = items.map((item) => {
-              if (item.historicValue !== undefined && item.historicValue !== null) {
-                return [item.blockDate.getTime(), parseFloat(item.historicValue)];
-              }
-              return null;
-            }).filter((p) => p !== null) as [number, number][];
-
-            historicPriceSeries = valuePerItem.sort((a, b) => +a[0] - +b[0]);
-            dailyPriceSeries = valuePerDay.sort((a, b) => +a[0] - +b[0]);
-          }
-        }
-
-        const options: Highcharts.Options = {
-          chart: {
-            zooming: {
-              type: 'x'
-            }
-          },
-          title: {
-            text: ''
-          },
-          xAxis: {
-            type: 'datetime'
-          },
-          yAxis: [
-            {
-              title: {
-                text: this.networkProperties.value?.tokenSymbol,
-                style: {
-                  color: '#350659'
-                }
-              }
-            }
-          ],
-          tooltip: {
-            headerFormat: '',
-          },
-          credits: {
-            enabled: false
-          },
-          legend: {
-            // enabled: false
-          },
-          series: [
-            {
-              type: 'line',
-              yAxis: 0,
-              // step: 'left',
-              color: '#350659',
-              name: this.networkProperties.value?.tokenSymbol + ' total',
-              data: items,
-              tooltip: {
-                pointFormat: pointFormat
-              },
-              marker: {
-                enabled: true
-              }
-            }
-          ]
-        }
-
-        if (historicPriceSeries && historicPriceSeries.length > 0) {
-          (options.yAxis! as any[]).push({
-            title: {
-              text: this.variables.currency.value,
-              style: {
-                color: '#426e24'
-              }
-            },
-            opposite: true
-          });
-
-          options.series!.push({
-            type: 'line',
-            yAxis: 1,
-            // step: 'left',
-            color: '#426e24',
-            name: this.variables.currency.value,
-            data: historicPriceSeries,
-            visible: false,
-            marker: {
-              enabled: true
-            }
-          });
-        }
-
-        if (dailyPriceSeries && dailyPriceSeries.length > 1) {
-          (options.yAxis! as any[]).push({
-            title: {
-              text: this.variables.currency.value,
-              style: {
-                color: '#5f8ea2'
-              }
-            },
-            opposite: true
-          });
-
-          options.series!.push({
-            type: 'line',
-            yAxis: 2,
-            color: '#5f8ea2',
-            name: this.variables.currency.value + ' daily value',
-            data: dailyPriceSeries,
-            visible: false,
-            marker: {
-              enabled: false
-            }
-          });
-        }
-
-        return options;
-      }),
       tap<Highcharts.Options | null>(() => {
         this.chartLoadingObservable.next(false);
         this.updateFlag = true;
