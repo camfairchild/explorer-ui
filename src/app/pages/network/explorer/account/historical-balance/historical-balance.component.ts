@@ -385,6 +385,67 @@ export class HistoricalBalanceComponent extends PaginatedListComponentBase<pst.A
         )
       ),
       map<(ChartItem | null)[], ChartItem[]>((items) => items.filter((i) => i !== null).sort((a, b) => +a!.blockDate - +b!.blockDate) as ChartItem[]),
+      combineLatestWith([undefined]),
+      map<[ChartItem[], ([number, number][] | undefined)], Highcharts.Options>(([items, historicPrices]): Highcharts.Options => {
+        let pointFormat = '<b>{point.x:%Y-%m-%d %H:%M:%S}</b><br>' +
+          'Block: {point.blockNumber}<br>' +
+          'Total: <b>{point.total}</b><br>' +
+          'Free: {point.free}<br>' +
+          'Reserved: {point.reserved}<br>' +
+          'Locked: {point.locked}<br>' +
+          'Transferable: {point.transferable}';
+
+        const options: Highcharts.Options = {
+          chart: {
+            zooming: {
+              type: 'x'
+            }
+          },
+          title: {
+            text: ''
+          },
+          xAxis: {
+            type: 'datetime'
+          },
+          yAxis: [
+            {
+              title: {
+                text: this.networkProperties.value?.tokenSymbol,
+                style: {
+                  color: '#350659'
+                }
+              }
+            }
+          ],
+          tooltip: {
+            headerFormat: '',
+          },
+          credits: {
+            enabled: false
+          },
+          legend: {
+            // enabled: false
+          },
+          series: [
+            {
+              type: 'line',
+              yAxis: 0,
+              // step: 'left',
+              color: '#350659',
+              name: this.networkProperties.value?.tokenSymbol + ' total',
+              data: items,
+              tooltip: {
+                pointFormat: pointFormat
+              },
+              marker: {
+                enabled: true
+              }
+            }
+          ]
+        }
+
+        return options;
+      }),
       tap<Highcharts.Options | null>(() => {
         this.chartLoadingObservable.next(false);
         this.updateFlag = true;
